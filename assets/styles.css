@@ -1,0 +1,96 @@
+/* ===========================================================
+   Chatbot Điện lực Đà Nẵng — Stylesheet
+   =========================================================== */
+
+/* Ẩn menu/footer mặc định của Streamlit cho gọn */
+#MainMenu, footer { visibility: hidden; }
+
+/* Container chính */
+.block-container {
+    padding: 1rem 2rem 2rem;
+    max-width: 1200px;
+}
+
+/* ─── Tab navigation ─────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 4px;
+    background: #f8f9fa;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+}
+.stTabs [aria-selected="true"] {
+    background: #0ea5a0;
+    color: white;
+}
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] { display: none; }
+
+/* ─── Chat bubble: user (đẩy về phải) ────────────────────── */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    flex-direction: row-reverse;
+    gap: 10px;
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"])
+    [data-testid="stChatMessageContent"] {
+    background: #0ea5a0;
+    color: white;
+    border-radius: 18px 4px 18px 18px;
+    padding: 10px 16px;
+    max-width: 75%;
+    margin-left: auto;
+    box-shadow: 0 2px 8px rgba(14,165,160,.25);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"])
+    [data-testid="stChatMessageContent"] p {
+    color: white;
+    margin: 0;
+}
+
+/* ─── Chat bubble: assistant ─────────────────────────────── */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"])
+    [data-testid="stChatMessageContent"] {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px 18px 18px 18px;
+    padding: 12px 16px;
+    max-width: 80%;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* ─── Citation card (hiển thị nguồn trích dẫn) ───────────── */
+.citation-card {
+    background: #f8fafc;
+    border-left: 3px solid #0ea5a0;
+    border-radius: 0 6px 6px 0;
+    padding: 8px 12px;
+    margin: 6px 0;
+    font-size: 12px;
+    color: #475569;
+}
+.citation-card strong { color: #0ea5a0; }
+
+/* ─── Body text màu chuẩn ────────────────────────────────── */
+.block-container p,
+[data-testid="stMarkdownContainer"] > p,
+[data-testid="stVerticalBlock"] > [data-testid="stText"] {
+    color: #1e293b;
+}
+
+/* Font cho heading có dấu tiếng Việt */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Segoe UI", "Arial", "Noto Sans", "Liberation Sans", sans-serif !important;
+}

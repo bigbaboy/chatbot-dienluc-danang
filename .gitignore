@@ -1,0 +1,57 @@
+# ── Secrets ───────────────────────────────
+.env
+*.key
+*_secret*
+
+# ── Python ────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# ── Virtualenv ────────────────────────────
+venv/
+env/
+.venv/
+ENV/
+
+# ── IDE ───────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Streamlit ─────────────────────────────
+.streamlit/secrets.toml
+
+# ── HuggingFace cache (rất nặng) ──────────
+.cache/
+~/.cache/huggingface/
+
+# ── Vector Database ────────────────────────
+# LƯU Ý: KHÔNG ignore faiss_dienluc_db/ nữa để deploy Streamlit Cloud
+# đọc được DB đã build sẵn. Nếu muốn giữ repo nhẹ, có thể bật lại
+# ignore và gọi tao_vector_db.py ở lần chạy đầu (xem README).
+#
+# faiss_dienluc_db/
+# *.faiss
+# *.pkl
+
+# ── Output ────────────────────────────────
+*.log
+*.tmp
+output/
+exports/
+
+# ── Word/Excel auto-generated ─────────────
+~$*.docx
+~$*.xlsx
