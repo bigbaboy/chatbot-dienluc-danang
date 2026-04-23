@@ -1,5 +1,3 @@
-"""Tab 4 — Điện mặt trời mái nhà."""
-
 from __future__ import annotations
 
 import plotly.graph_objects as go
@@ -26,7 +24,6 @@ SOLAR_MIN_BAR_RATIO = 0.015
 
 
 def render() -> None:
-    """Vẽ toàn bộ Tab Điện mặt trời."""
     st.markdown("#### Máy tính điện mặt trời mái nhà")
     st.markdown(
         "Ước tính sản lượng, tiết kiệm điện và thời gian hoàn vốn khi lắp điện mặt trời."
@@ -57,17 +54,7 @@ def render() -> None:
                 min_value=10.0, max_value=5000.0, value=250.0,
                 step=10.0, key="solar_kwh",
             )
-            tu_dung_rate = st.slider(
-                "Tỷ lệ tiêu thụ ban ngày (%)",
-                min_value=30, max_value=100,
-                value=int(SOLAR_SELF_USE_RATE * 100), step=5, key="solar_tudung",
-                help=(
-                    "Phần trăm điện bạn dùng vào BAN NGÀY (khi ĐMT đang sản xuất). "
-                    "Ví dụ 70%: trong tổng tiêu thụ, 70% rơi vào ban ngày nên có thể "
-                    "được ĐMT phủ, 30% còn lại vào ban đêm phải mua từ EVN. "
-                    "Hộ đi làm ban ngày → rate thấp (~40%), hộ có người ở nhà → cao (~80%)."
-                ),
-            ) / 100
+            tu_dung_rate = SOLAR_SELF_USE_RATE
 
         btn_solar = st.button("Tính toán điện mặt trời", type="primary")
 
@@ -187,7 +174,7 @@ def render() -> None:
 | Công suất hệ thống | {cong_suat_kwp:.2f} kWp |
 | Sản lượng / ngày | {san_luong_ngay:.1f} kWh |
 | Sản lượng / tháng | {san_luong_thang:.0f} kWh |
-| kWh tự dùng / tháng | {kwh_tu_dung:.0f} kWh (tiêu thụ ban ngày {int(tu_dung_rate*100)}%) |
+| kWh tự dùng / tháng | {kwh_tu_dung:.0f} kWh |
 | kWh bán lại EVN / tháng | {kwh_ban_lai:.0f} kWh |
 | Tiết kiệm tiền điện / tháng | {dinh_dang_tien(tiet_kiem_thang)} |
 | Doanh thu bán điện dư / tháng | {dinh_dang_tien(doanh_thu_ban)} |

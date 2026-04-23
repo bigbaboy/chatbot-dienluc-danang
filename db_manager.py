@@ -1,18 +1,7 @@
-"""
-Quản lý FAISS Vector Database.
-
-Module này tập trung tất cả các thao tác với FAISS để:
-  - Tránh duplicate code (trước đây code build/save FAISS lặp 3 lần)
-  - Dễ test và mock trong unit test
-  - Khi muốn đổi sang vector store khác (Chroma, Pinecone...) chỉ cần sửa 1 chỗ
-"""
-
 from __future__ import annotations
-
 import logging
 import os
 from typing import List, Optional, Tuple
-
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -28,12 +17,11 @@ from config import (
 
 logger = logging.getLogger(__name__)
 
-# Cache embeddings để không phải reload model mỗi lần gọi (model ~120MB)
+
 _embeddings: Optional[HuggingFaceEmbeddings] = None
 
 
 def get_embeddings() -> HuggingFaceEmbeddings:
-    """Singleton embeddings — load model 1 lần và tái sử dụng."""
     global _embeddings
     if _embeddings is None:
         logger.info("Loading embedding model: %s", EMBEDDING_MODEL)
@@ -45,7 +33,6 @@ def get_embeddings() -> HuggingFaceEmbeddings:
 
 
 def split_documents(documents: List[Document]) -> List[Document]:
-    """Chia tài liệu thành chunks với cấu hình chuẩn."""
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
@@ -55,16 +42,6 @@ def split_documents(documents: List[Document]) -> List[Document]:
 
 
 def build_faiss_db(documents: List[Document], db_dir: str = DB_DIR) -> Tuple[FAISS, int]:
-    """
-    Build FAISS DB từ documents và lưu vào db_dir.
-
-    Args:
-        documents: Danh sách Document đã đọc từ PDF
-        db_dir: Thư mục lưu FAISS
-
-    Returns:
-        (db, so_chunks)
-    """
     chunks = split_documents(documents)
     if not chunks:
         raise ValueError("Không có chunk nào để build FAISS DB.")
@@ -79,12 +56,6 @@ def build_faiss_db(documents: List[Document], db_dir: str = DB_DIR) -> Tuple[FAI
 def merge_into_existing_db(
     base_db: FAISS, new_documents: List[Document], db_dir: str = DB_DIR
 ) -> int:
-    """
-    Merge tài liệu mới vào FAISS DB hiện có và lưu lại.
-
-    Returns:
-        Số chunks đã thêm vào.
-    """
     chunks = split_documents(new_documents)
     if not chunks:
         return 0
@@ -97,19 +68,10 @@ def merge_into_existing_db(
 
 
 def faiss_db_exists(db_dir: str = DB_DIR) -> bool:
-    """Kiểm tra FAISS DB đã được build chưa (có file index.faiss)."""
     return os.path.isfile(os.path.join(db_dir, "index.faiss"))
 
 
 def load_faiss_db(db_dir: str = DB_DIR) -> Optional[FAISS]:
-    """
-    Load FAISS DB từ ổ đĩa. Trả về None nếu DB chưa được build.
-
-    Lưu ý về `allow_dangerous_deserialization=True`: cờ này được Langchain
-    yêu cầu vì FAISS load qua pickle, có thể chứa code độc hại nếu file
-    đến từ nguồn không tin cậy. Trong dự án này DB được build local từ
-    chính các PDF của nhà trường nên an toàn.
-    """
     if not faiss_db_exists(db_dir):
         return None
 

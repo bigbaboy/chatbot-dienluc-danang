@@ -1,5 +1,3 @@
-"""Tab 3 — Phân tích tiêu thụ điện theo thiết bị."""
-
 from __future__ import annotations
 
 import pandas as pd
@@ -10,7 +8,6 @@ from config import (
     BENCHMARK_HO_GIA_DINH,
     LOAI_NHA_OPTIONS,
     THIET_BI_MAC_DINH,
-    THU_VIEN_THIET_BI,
     TU_LANH_KWH_NGAY,
 )
 from rag_pipeline import goi_ai_voi_xu_ly_loi
@@ -18,7 +15,6 @@ from utils import dinh_dang_tien, tinh_kwh_thang, tinh_tien_dien
 
 
 def _render_thiet_bi_mac_dinh() -> None:
-    """Danh sách thiết bị mặc định với input quantity/hours."""
     for ten, cong_suat, gio_md, ghi_chu in THIET_BI_MAC_DINH:
         st.markdown(f"**{ten}** — _{ghi_chu}_")
         c1, c2 = st.columns(2)
@@ -31,43 +27,8 @@ def _render_thiet_bi_mac_dinh() -> None:
         )
 
 
-def _render_thu_vien_thiet_bi() -> None:
-    """Dropdown chọn thiết bị từ thư viện và thêm vào custom_devices."""
-    lib_names = ["— Chọn thiết bị từ thư viện —"] + list(THU_VIEN_THIET_BI.keys())
-    selected = st.selectbox(
-        "Thiết bị:", lib_names, key="lib_select", label_visibility="collapsed",
-    )
-    if selected == "— Chọn thiết bị từ thư viện —":
-        return
-
-    cs_lib, gio_lib, ghi_lib = THU_VIEN_THIET_BI[selected]
-    st.caption(f"ℹ️ {f'{cs_lib*1000:.0f}W · ' if cs_lib else ''}{ghi_lib}")
-    lc1, lc2, lc3 = st.columns([1, 1, 2])
-    lib_qty = lc1.number_input("SL", 1, 20, 1, key="lib_qty")
-
-    if cs_lib:
-        lib_hrs = lc2.number_input("Giờ/ngày", 0, 24, gio_lib, key="lib_hrs")
-    else:
-        lib_hrs = 24
-        lc2.caption(f"{ghi_lib.split(' kWh')[0]} kWh/ng")
-
-    if lc3.button("➕ Thêm vào danh sách", key="lib_add"):
-        if cs_lib:
-            st.session_state.custom_devices.append({
-                "name": selected, "power_kw": cs_lib,
-                "qty": lib_qty, "hrs": lib_hrs,
-            })
-        else:
-            kwh_nd = float(ghi_lib.split(" kWh")[0])
-            st.session_state.custom_devices.append({
-                "name": selected, "power_kw": None,
-                "kwh_ngay": kwh_nd, "qty": lib_qty, "hrs": 24,
-            })
-        st.rerun()
-
 
 def _render_them_thu_cong_va_danh_sach() -> None:
-    """Form thêm thiết bị thủ công + danh sách các custom devices đã thêm."""
     c1, c2, c3, c4 = st.columns([2, 1, 1, 1])
     ten_tb = c1.text_input("Tên", placeholder="VD: Bình nóng lạnh",
                             key="new_name", label_visibility="collapsed")
@@ -115,7 +76,6 @@ def _render_them_thu_cong_va_danh_sach() -> None:
 
 
 def _tinh_tong_thiet_bi() -> dict:
-    """Gom kWh của tất cả thiết bị (mặc định + custom) thành dict."""
     device_data = {}
 
     for ten, cong_suat, gio_md, _ in THIET_BI_MAC_DINH:
@@ -140,7 +100,6 @@ def _tinh_tong_thiet_bi() -> dict:
 
 
 def _render_so_sanh_benchmark(total_kwh: float) -> None:
-    """So sánh với benchmark hộ gia đình tương tự."""
     with st.expander("📊 So sánh với hộ gia đình tương tự"):
         st.markdown("Chọn thông tin hộ để so sánh mức tiêu thụ với dữ liệu EVN.")
         bc1, bc2 = st.columns(2)
@@ -203,7 +162,6 @@ def _render_so_sanh_benchmark(total_kwh: float) -> None:
 
 
 def render(llm) -> None:
-    """Vẽ toàn bộ Tab Phân tích tiêu thụ."""
     st.markdown("#### Ước tính tiêu thụ điện của hộ gia đình")
     st.markdown("Nhập thông tin thiết bị để ước tính số kWh và tiền điện hàng tháng.")
 
@@ -214,10 +172,6 @@ def render(llm) -> None:
         with st.container(border=True):
             _render_thiet_bi_mac_dinh()
 
-        st.markdown("**Thư viện thiết bị — chọn nhanh**")
-        with st.container(border=True):
-            _render_thu_vien_thiet_bi()
-
         st.markdown("**Thêm thiết bị thủ công**")
         with st.container(border=True):
             _render_them_thu_cong_va_danh_sach()
@@ -225,75 +179,76 @@ def render(llm) -> None:
         btn_analyze = st.button("Tính toán", type="primary")
 
     with col_result:
+        # Bước 1: tính toán và lưu vào session_state khi nhấn nút
         if btn_analyze:
             device_data = _tinh_tong_thiet_bi()
             total_kwh = round(sum(device_data.values()), 1)
-
             if total_kwh == 0:
+                st.session_state.pop("_last_analysis", None)
                 st.warning("Chưa có thiết bị nào. Vui lòng nhập số lượng thiết bị.")
             else:
                 _, _, _, total_money = tinh_tien_dien(total_kwh)
-                st.metric(
-                    "Tổng tiêu thụ / tháng", f"{total_kwh} kWh",
-                    delta=f"Ước tính: {dinh_dang_tien(total_money)}",
-                )
-
                 top_device = max(device_data, key=device_data.get)
                 pct_top = round(device_data[top_device] / total_kwh * 100, 1)
-                st.info(
-                    f"**{top_device}** chiếm nhiều nhất: {pct_top}% "
-                    f"({device_data[top_device]} kWh)"
-                )
-
-                # Pie chart
-                fig_pie = go.Figure(go.Pie(
-                    labels=list(device_data.keys()),
-                    values=list(device_data.values()),
-                    hole=0.4, textinfo="label+percent",
-                ))
-                fig_pie.update_layout(
-                    title="Tỷ trọng tiêu thụ theo thiết bị",
-                    height=300, showlegend=False,
-                    plot_bgcolor="white", paper_bgcolor="white",
-                    margin={"t": 50, "b": 10, "l": 10, "r": 10},
-                )
-                st.plotly_chart(fig_pie, use_container_width=True)
-
-                # Bảng xếp hạng
                 sorted_dev = sorted(
                     device_data.items(), key=lambda x: x[1], reverse=True
                 )
-                rows = [
-                    {
-                        "Hạng": rank,
-                        "Thiết bị": name,
-                        "kWh/tháng": kwh,
-                        "Tỷ lệ": f"{round(kwh / total_kwh * 100, 1)}%",
-                    }
-                    for rank, (name, kwh) in enumerate(sorted_dev, 1)
-                ]
-                st.table(pd.DataFrame(rows))
-
-                # Lưu để nút AI dùng
                 st.session_state["_last_analysis"] = {
                     "total_kwh": total_kwh,
                     "total_money": total_money,
+                    "device_data": device_data,
                     "sorted_dev": sorted_dev,
                     "top_device": top_device,
                     "pct": pct_top,
                 }
 
-                _render_so_sanh_benchmark(total_kwh)
-        else:
-            st.info("Nhập thông tin thiết bị rồi nhấn 'Tính toán' để xem kết quả.")
-
-        # AI khuyến nghị
+        # Bước 2: render từ session_state — tồn tại qua mọi rerun
         if st.session_state.get("_last_analysis"):
             last = st.session_state["_last_analysis"]
+            total_kwh = last["total_kwh"]
+            device_data = last["device_data"]
+            sorted_dev = last["sorted_dev"]
+
+            st.metric(
+                "Tổng tiêu thụ / tháng", f"{total_kwh} kWh",
+                delta=f"Ước tính: {dinh_dang_tien(last['total_money'])}",
+            )
+            st.info(
+                f"**{last['top_device']}** chiếm nhiều nhất: {last['pct']}% "
+                f"({device_data[last['top_device']]} kWh)"
+            )
+
+            fig_pie = go.Figure(go.Pie(
+                labels=list(device_data.keys()),
+                values=list(device_data.values()),
+                hole=0.4, textinfo="label+percent",
+            ))
+            fig_pie.update_layout(
+                title="Tỷ trọng tiêu thụ theo thiết bị",
+                height=300, showlegend=False,
+                plot_bgcolor="white", paper_bgcolor="white",
+                margin={"t": 50, "b": 10, "l": 10, "r": 10},
+            )
+            st.plotly_chart(fig_pie, use_container_width=True)
+
+            rows = [
+                {
+                    "Hạng": rank,
+                    "Thiết bị": name,
+                    "kWh/tháng": kwh,
+                    "Tỷ lệ": f"{round(kwh / total_kwh * 100, 1)}%",
+                }
+                for rank, (name, kwh) in enumerate(sorted_dev, 1)
+            ]
+            st.table(pd.DataFrame(rows))
+
+            _render_so_sanh_benchmark(total_kwh)
+
+            # AI khuyến nghị
             if st.button("AI khuyến nghị tiết kiệm", disabled=(llm is None),
                          key="btn_ai_tieu_thu"):
                 with st.spinner("Đang phân tích..."):
-                    ds = ", ".join(f"{k}: {v}kWh" for k, v in last["sorted_dev"])
+                    ds = ", ".join(f"{k}: {v}kWh" for k, v in sorted_dev)
                     prompt = (
                         f"Hộ gia đình tiêu thụ {last['total_kwh']} kWh/tháng, "
                         f"ước tính {dinh_dang_tien(last['total_money'])}.\n"
@@ -308,3 +263,5 @@ def render(llm) -> None:
 
             if st.session_state.get("ai_tuvan_tab_tieu_thu"):
                 st.markdown(st.session_state["ai_tuvan_tab_tieu_thu"])
+        else:
+            st.info("Nhập thông tin thiết bị rồi nhấn 'Tính toán' để xem kết quả.")

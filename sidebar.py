@@ -1,9 +1,4 @@
-"""
-Sidebar của ứng dụng — chứa hồ sơ khách hàng, lịch sử tiêu thụ và trạng thái hệ thống.
-"""
-
 from __future__ import annotations
-
 import json
 from datetime import datetime
 
@@ -13,12 +8,11 @@ import streamlit as st
 from config import LOAI_NHA_OPTIONS, SOLAR_PSH
 from utils import thang_hop_le, tinh_tien_dien
 
-# Số tháng gần nhất hiển thị trên biểu đồ lịch sử tiêu thụ
+
 MAX_LICH_SU_HIEN_THI = 6
 
 
 def _render_ho_so() -> None:
-    """Form hồ sơ khách hàng."""
     with st.expander(
         "👤 Hồ sơ của bạn",
         expanded=(not st.session_state.profile_ten),
@@ -55,12 +49,11 @@ def _render_ho_so() -> None:
             f"Xin chào, **{st.session_state.profile_ten}**!  \n"
             f"{st.session_state.profile_so_nguoi} người · "
             f"{st.session_state.profile_loai_nha} · "
-            f"{st.session_state.profile_khu_vuc.split('/')[0].strip()}"
+            f"{st.session_state.profile_khu_vuc}"
         )
 
 
 def _render_lich_su_tieu_thu() -> None:
-    """Form lịch sử tiêu thụ + biểu đồ 6 tháng gần nhất."""
     with st.expander("📅 Lịch sử tiêu thụ"):
         st.caption("Nhập tiêu thụ hàng tháng để theo dõi xu hướng.")
         lh_col1, lh_col2 = st.columns(2)
@@ -111,7 +104,6 @@ def _render_lich_su_tieu_thu() -> None:
 
 
 def _render_trang_thai_he_thong(vector_db, llm) -> None:
-    """Hiển thị trạng thái Vector DB / LLM và nút export chat."""
     st.caption(
         f"Vector DB: {'✅' if vector_db else '❌'}  |  "
         f"LLM: {'✅' if llm else '❌'}"
@@ -138,7 +130,6 @@ def _render_trang_thai_he_thong(vector_db, llm) -> None:
 
 
 def render(vector_db, llm) -> None:
-    """Vẽ toàn bộ sidebar."""
     with st.sidebar:
         st.markdown("### ⚡ Điện lực Đà Nẵng")
         _render_ho_so()

@@ -1,36 +1,22 @@
-"""
-Đọc PDF thông minh với cơ chế fallback PyMuPDF → LlamaParse OCR.
-
-Quy trình:
-  1. Kiểm tra PDF có text layer hay là ảnh scan
-  2. PDF có text → dùng PyMuPDF (nhanh, miễn phí)
-  3. PDF ảnh/scan → dùng LlamaParse OCR (cần API key)
-  4. Mọi trường hợp lỗi → fallback về PyMuPDF
-"""
-
 from __future__ import annotations
-
 import logging
 import os
 from typing import List, Optional
 
-import fitz  # PyMuPDF
+import fitz  
 from langchain_core.documents import Document
 
 from config import LLAMA_CLOUD_API_KEY
 
 logger = logging.getLogger(__name__)
 
-# Ngưỡng số ký tự tối thiểu để coi 1 trang là "có nội dung"
+
 MIN_TEXT_CHARS = 30
-# Tỷ lệ trang có text tối thiểu để coi PDF là PDF text (vs scan)
 TEXT_PDF_RATIO = 0.5
-# Ngưỡng ký tự để tính 1 trang là "có text"
 PAGE_TEXT_THRESHOLD = 50
 
 
 def doc_pdf_text(path: str, source_name: str) -> List[Document]:
-    """Đọc PDF có text layer bằng PyMuPDF."""
     pages: List[Document] = []
     try:
         pdf = fitz.open(path)
@@ -62,7 +48,6 @@ def doc_pdf_text(path: str, source_name: str) -> List[Document]:
 
 
 def doc_pdf_llamaparse(path: str, source_name: str) -> List[Document]:
-    """Đọc PDF ảnh/scan bằng LlamaParse OCR. Fallback PyMuPDF nếu lỗi."""
     if not LLAMA_CLOUD_API_KEY or LLAMA_CLOUD_API_KEY.startswith("llx-xxx"):
         logger.warning("Chưa có LLAMA_CLOUD_API_KEY → dùng PyMuPDF")
         return doc_pdf_text(path, source_name)
@@ -101,7 +86,6 @@ def doc_pdf_llamaparse(path: str, source_name: str) -> List[Document]:
 
 
 def kiem_tra_pdf_co_text(path: str) -> bool:
-    """Kiểm tra PDF có text hay là ảnh scan."""
     try:
         pdf = fitz.open(path)
         total = len(pdf)
@@ -123,7 +107,6 @@ def kiem_tra_pdf_co_text(path: str) -> bool:
 def doc_pdf_thong_minh(
     path: str, source_name: Optional[str] = None
 ) -> List[Document]:
-    """Đọc PDF thông minh, tự chọn PyMuPDF hay LlamaParse."""
     if source_name is None:
         source_name = os.path.basename(path)
 

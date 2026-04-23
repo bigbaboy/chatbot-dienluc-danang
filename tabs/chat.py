@@ -1,5 +1,3 @@
-"""Tab 1 — Trợ lý Pháp lý (RAG Chatbot)."""
-
 from __future__ import annotations
 
 import html
@@ -25,7 +23,6 @@ CONFIDENCE_MED_PCT = int(CONFIDENCE_MED * 100)
 
 
 def _render_confidence_badge(conf: float) -> None:
-    """Hiển thị badge 'Độ tin cậy X%' bên dưới câu trả lời AI."""
     pct = int(conf * 100)
     if conf >= CONFIDENCE_HIGH:
         color, bg, label = "#15803d", "#dcfce7", f"Độ tin cậy cao ({pct}%)"
@@ -43,12 +40,6 @@ def _render_confidence_badge(conf: float) -> None:
 
 
 def _render_citations(citations: list) -> None:
-    """Render expander hiển thị các nguồn tham khảo.
-
-    Các trường chuỗi (src, page, snippet) lấy từ metadata PDF nên có thể
-    chứa ký tự `<`, `>`, `&` — phải escape trước khi nhúng vào HTML để
-    tránh vỡ layout hoặc XSS nếu tài liệu upload lên có nội dung độc hại.
-    """
     if not citations:
         return
     with st.expander(f"Nguồn tham khảo ({len(citations)} tài liệu)"):
@@ -80,7 +71,6 @@ def _render_citations(citations: list) -> None:
 
 
 def render(vector_db, llm) -> None:
-    """Vẽ toàn bộ nội dung Tab Trợ lý Pháp lý."""
     st.markdown("""
     <div style="background:linear-gradient(135deg,#0ea5a0,#0369a1);
                 border-radius:12px;padding:16px 20px;margin-bottom:16px;
@@ -152,7 +142,7 @@ def render(vector_db, llm) -> None:
             ten_prefix = f"Khách hàng: {p.profile_ten}. " if p.profile_ten else ""
             cau_hoi_day_du = (
                 f"{ten_prefix}[Hộ {p.profile_so_nguoi} người, {p.profile_loai_nha}, "
-                f"khu vực {p.profile_khu_vuc.split('/')[0].strip()}] {cau_hoi}"
+                f"khu vực {p.profile_khu_vuc}] {cau_hoi}"
             )
         else:
             cau_hoi_day_du = cau_hoi

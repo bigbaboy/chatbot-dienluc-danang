@@ -1,22 +1,10 @@
-"""
-Script build Vector Database (FAISS) từ tất cả file PDF trong thư mục data/.
-
-Cách chạy:
-    python tao_vector_db.py
-
-Sau khi chạy xong sẽ tạo thư mục `faiss_dienluc_db/` chứa index.
-"""
-
 from __future__ import annotations
-
 import logging
 import os
 import sys
 import time
 from typing import List
-
 from langchain_core.documents import Document
-
 from config import CHUNK_OVERLAP, CHUNK_SIZE, DATA_DIR, DB_DIR
 from db_manager import build_faiss_db
 from doc_pdf_smart import doc_pdf_thong_minh
@@ -25,12 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 def lay_danh_sach_pdf() -> List[str]:
-    """Trả về danh sách file PDF trong thư mục data/ (đã sort alphabet)."""
     if not os.path.isdir(DATA_DIR):
         print(f"[LỖI] Không tìm thấy thư mục: {DATA_DIR}")
         print("      Hãy tạo thư mục 'data/' và đặt file PDF vào.")
         sys.exit(1)
-
     pdf_files = sorted(
         f for f in os.listdir(DATA_DIR) if f.lower().endswith(".pdf")
     )
@@ -42,7 +28,6 @@ def lay_danh_sach_pdf() -> List[str]:
 
 
 def doc_tat_ca_pdf(pdf_files: List[str]) -> List[Document]:
-    """Đọc tất cả PDF và gom thành 1 danh sách documents."""
     all_docs: List[Document] = []
     for pdf_file in pdf_files:
         file_path = os.path.join(DATA_DIR, pdf_file)

@@ -1,15 +1,10 @@
-"""Tab 2 — Tính tiền điện bậc thang."""
-
 from __future__ import annotations
-
-from datetime import datetime
 
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
 from config import BIEU_GIA_DIEN
-from hoa_don import tao_hoa_don_html
 from rag_pipeline import goi_ai_voi_xu_ly_loi
 from utils import dinh_dang_tien, tinh_tiet_kiem_tach_ho, tinh_tien_dien
 
@@ -20,7 +15,6 @@ NGUONG_CANH_BAO_VUOT_BAC = 20
 
 
 def _render_df_gia_bieu() -> pd.DataFrame:
-    """Bảng biểu giá hiển thị trong UI."""
     return pd.DataFrame([
         {
             "Bậc": f"Bậc {bg['bac']}",
@@ -37,7 +31,6 @@ def _render_waterfall(
     bacs: list, tien_vat: float, tong_per_ho: float,
     kwh_per_ho: float, so_ho: int, tong_all: float,
 ) -> None:
-    """Waterfall chart hiển thị cách tiền cộng dồn qua các bậc."""
     nhan = [
         (
             f"Bậc {b['bac']} ({b['tu']}–{b['den']} kWh)"
@@ -69,7 +62,6 @@ def _render_waterfall(
 
 
 def _render_canh_bao_vuot_bac(bacs: list) -> None:
-    """Cảnh báo nếu còn ít kWh nữa là vượt sang bậc cao hơn."""
     if not bacs:
         return
     bac_hien = bacs[-1]
@@ -103,7 +95,6 @@ def _render_canh_bao_vuot_bac(bacs: list) -> None:
 
 
 def render(llm) -> None:
-    """Vẽ toàn bộ Tab Tính tiền điện."""
     st.markdown("#### Tính tiền điện sinh hoạt bậc thang — Biểu giá 2025")
     col_l, col_r = st.columns([1, 1.5], gap="large")
 
@@ -206,26 +197,6 @@ def render(llm) -> None:
             st.table(pd.DataFrame(rows))
 
         _render_canh_bao_vuot_bac(bacs)
-
-        # Xuất hóa đơn HTML
-        hoa_don_html = tao_hoa_don_html(
-            kwh_input, so_ho, kwh_per_ho, chi_tiet,
-            tong_per_ho, tien_vat_ho, tong_all,
-        )
-        ten_file = (
-            f"hoadon_{kwh_input:.0f}kwh_{so_ho}ho_"
-            f"{datetime.now().strftime('%Y%m%d')}.html"
-        )
-        st.download_button(
-            label="Xuất hóa đơn (HTML → in PDF)",
-            data=hoa_don_html.encode("utf-8"),
-            file_name=ten_file,
-            mime="text/html",
-            help=(
-                "Tải file HTML về, mở bằng trình duyệt rồi nhấn Ctrl+P "
-                "để in hoặc lưu thành PDF."
-            ),
-        )
 
         # AI tư vấn — cache vào session_state để không mất khi rerun
         if st.button("AI tư vấn tiết kiệm điện", disabled=(llm is None),

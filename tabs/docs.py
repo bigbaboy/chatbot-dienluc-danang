@@ -1,5 +1,3 @@
-"""Tab 6 — Quản lý tài liệu RAG (upload, rebuild Vector DB)."""
-
 from __future__ import annotations
 
 import logging
@@ -16,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 def _render_upload_section(vector_db, init_system_fn) -> None:
-    """Form upload PDF mới và tích hợp vào FAISS."""
     st.markdown("**Tải lên tài liệu mới**")
     uploaded_files = st.file_uploader(
         "Chọn file PDF", type=["pdf"], accept_multiple_files=True,
@@ -94,7 +91,6 @@ def _render_upload_section(vector_db, init_system_fn) -> None:
 
 
 def _render_delete_file(filename: str, filepath: str) -> None:
-    """Xử lý logic xóa file với xác nhận 2 bước."""
     col_info, col_del = st.columns([5, 1])
     size_kb = os.path.getsize(filepath) / 1024
     mod_str = datetime.fromtimestamp(
@@ -134,7 +130,6 @@ def _render_delete_file(filename: str, filepath: str) -> None:
 
 
 def _render_rebuild_button(pdf_files: list, init_system_fn) -> None:
-    """Nút rebuild Vector DB từ tất cả PDF."""
     st.markdown("---")
     st.markdown("**Đồng bộ hóa Vector DB**")
     st.caption("Dùng khi đã xóa tài liệu hoặc muốn xây lại DB từ đầu.")
@@ -161,7 +156,6 @@ def _render_rebuild_button(pdf_files: list, init_system_fn) -> None:
 
 
 def render(vector_db, init_system_fn) -> None:
-    """Vẽ toàn bộ Tab Quản lý Tài liệu."""
     st.markdown("#### Quản lý Tài liệu RAG")
     st.markdown("Tải lên file PDF mới để mở rộng cơ sở kiến thức cho chatbot.")
 
